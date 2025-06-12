@@ -1,18 +1,16 @@
-// src/router/index.js
-import Vue from 'vue'
-import Router from 'vue-router'
-import SignupPage from '@/views/SignupPage.vue'
+// router/index.js
+import { createRouter, createWebHistory } from 'vue-router'
+import LoginPage from '@/components/Login.vue'
+import MainPage from '@/components/MainPage.vue'
 
-Vue.use(Router)
+const routes = [
+  { path: '/', component: MainPage },
+  { path: '/login', component: LoginPage }
+]
 
-export default new Router({
-  mode: 'history',
-  routes: [
-    {
-      path: '/signup',
-      name: 'Signup',
-      component: SignupPage,
-    },
-    // 필요 시 다른 경로도 추가 가능
-  ],
+const router = createRouter({
+  history: createWebHistory(),
+  routes
 })
+
+export default router
