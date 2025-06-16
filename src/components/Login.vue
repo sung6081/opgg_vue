@@ -20,17 +20,22 @@
       <div class="mt-6 text-center">
         <KakaoLogin />
       </div>
+      <div class="mt-6 text-center">
+        <GoogleLogin />
+      </div>
     </div>
   </div>
 </template>
 
 <script>
+import GoogleLogin from './GoogleLogin.vue';
 import KakaoLogin from './KakaoLogin.vue'
 
 export default {
   name: 'LoginPage',
   components: {
-    KakaoLogin
+    KakaoLogin,
+    GoogleLogin
   },
   data() {
     return {
