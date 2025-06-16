@@ -1,3 +1,4 @@
+<!-- Login.vue -->
 <template>
   <div class="flex items-center justify-center min-h-screen bg-gray-100">
     <div class="bg-white p-8 rounded-xl shadow-md w-full max-w-md">
@@ -15,6 +16,9 @@
         </div>
         <button type="submit" class="w-full bg-blue-500 text-white py-2 rounded">로그인</button>
       </form>
+
+      <!-- 회원가입 버튼 -->
+      <button @click="goToSignup" class="w-full bg-gray-300 text-black py-2 rounded mt-2">회원가입</button>
 
       <!-- 카카오 로그인 버튼 -->
       <div class="mt-6 text-center">
@@ -46,6 +50,9 @@ export default {
   methods: {
     async handleLogin() {
       // 이메일/비밀번호 로그인 로직
+    },
+    goToSignup() {
+      this.$router.push('/signup')
     }
   }
 }
