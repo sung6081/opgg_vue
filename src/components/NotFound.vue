@@ -1,7 +1,13 @@
 <template>
   <div class="min-h-screen flex flex-col items-center justify-center bg-gray-100" style="background-color: rgb(31 41 55 / var(--tw-bg-opacity, 1));">
-    <!-- 이미지 -->
-    <img src="@/assets/poro.png" alt="Poro" class="mb-6 w-148 h-auto" />
+
+    <!-- 중앙 메시지 -->
+    <div
+        class="flex flex-col items-center justify-center h-96 bg-gray-800 rounded-xl shadow-inner text-center mt-10"
+    >
+        <p class="text-3xl font-semibold text-white mb-2">검색 결과가 없습니다</p>
+        <p class="text-sm text-gray-400">정확한 닉네임과 태그를 입력해주세요.</p>
+    </div>
 
     <div class="w-full max-w-2xl px-4">
       <div class="flex items-center bg-white border border-gray-300 rounded-full shadow-md overflow-hidden">
