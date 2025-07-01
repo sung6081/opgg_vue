@@ -25,6 +25,11 @@
           KR
         </div>
       </div>
+
+      <!-- 전적 정보 -->
+       <div>
+            <MatchDetail />
+       </div>
     </div>
   </div>
 </template>
@@ -32,8 +37,14 @@
 <script>
 
     import $ from "jquery";
+    import MatchDetail from "./MatchDetail.vue";
 
     export default {
+
+        components: {
+            MatchDetail
+        },
+
         data() {
             return {
                 profileIconId: null,
