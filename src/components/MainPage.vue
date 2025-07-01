@@ -8,20 +8,25 @@
         <!-- 태그 입력 영역 (왼쪽) -->
         <div class="flex items-center w-1/2 border-r border-gray-300 px-4 py-4">
           <input
-            v-model="tagText"
+            v-model="searchText"
+            @input="handleInputChange"
+            @compositionend="handleInputChange"
             type="text"
             placeholder="플레이어"
             class="w-full text-lg focus:outline-none"
+            id="player"
           />
         </div>
 
         <!-- 플레이어 입력 영역 (오른쪽) -->
         <span class="text-gray-500 mr-2">#</span>
         <input
-          v-model="searchText"
+          v-model="tagText"
           type="text"
           placeholder="태그"
           class="w-1/2 py-4 text-lg focus:outline-none"
+          id="tag"
+>>>>>>>>> Temporary merge branch 2
         />
 
         <!-- 검색 버튼 -->
@@ -100,6 +105,7 @@ const handleSearch = () => {
     data() {
       return {
         searchText: "",
+        tagText: "",
         accounts: []
       };
     },
@@ -133,26 +139,30 @@ const handleSearch = () => {
       },
       handleSearch() {
         // 검색 버튼 눌렀을 때 처리 (필요 시 handleInputChange 재호출 가능)
-        const input = $('input').val();
-        console.log(input);
 
-        if(input.includes("#")) {
-          //로직 실행
-          const parts = input.split("#");
-          const gameName = parts[0];
-          const tagLine = parts[1];
-          console.log("gameName : "+gameName);
-          console.log("tag : "+ tagLine);
-          this.$router.push({
-            path: "/search",
-            query: {
-              gameName,
-              tagLine
-            }
-          });
-        }else {
-          alert("tag를 입력해주세요.");
+        const searchText = document.getElementById("player").value;
+        const tagText = document.getElementById("tag").value;
+
+        if (!searchText || !tagText) {
+          alert('플레이어와 태그를 모두 입력해주세요.')
+          return
         }
+
+        this.searchText = searchText;
+        this.tagText = tagText;
+
+        //로직 실행
+        const gameName = searchText;
+        const tagLine = tagText;
+        console.log("gameName : "+gameName);
+        console.log("tag : "+ tagLine);
+        this.$router.push({
+          path: "/search",
+          query: {
+            gameName: gameName,
+            tagLine: tagLine
+          }
+        });
       },
       getProfileIconUrl(iconId) {
         if(iconId < 0) {
