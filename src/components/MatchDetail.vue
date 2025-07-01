@@ -49,9 +49,11 @@ const route = useRoute()
 const matches = ref([])
 
 onMounted(async () => {
-  const { gameName, tagLine } = route.params
+  const { gameName, tagLine } = route.query;
+  console.log("전적 검색 : "+gameName+"#"+tagLine);
   try {
     const res = await axios.get(`http://localhost:8080/opgg/riotapi/getRecentMatches/${gameName}/${tagLine}`)
+    console.log(res);
     matches.value = res.data
   } catch (e) {
     console.error('전적 조회 실패:', e)

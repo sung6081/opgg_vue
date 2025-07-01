@@ -25,13 +25,13 @@
           KR
         </div>
       </div>
-
-      <!-- 전적 정보 -->
-       <div>
-            <MatchDetail />
-       </div>
-    </div>
   </div>
+
+    <!-- 전적 정보 -->
+    <div>
+        <MatchDetail />
+    </div>
+    </div>
 </template>
 
 <script>
