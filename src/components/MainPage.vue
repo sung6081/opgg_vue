@@ -5,14 +5,28 @@
 
     <div class="w-full max-w-2xl px-4">
       <div class="flex items-center bg-white border border-gray-300 rounded-full shadow-md overflow-hidden">
+        <!-- 태그 입력 영역 (왼쪽) -->
+        <div class="flex items-center w-1/2 border-r border-gray-300 px-4 py-4">
+          <input
+            v-model="tagText"
+            type="text"
+            placeholder="플레이어"
+            class="w-full text-lg focus:outline-none"
+          />
+        </div>
+
+        <!-- 플레이어 입력 영역 (오른쪽) -->
+        <span class="text-gray-500 mr-2">#</span>
         <input
           v-model="searchText"
           @input="handleInputChange"
           @compositionend="handleInputChange"
           type="text"
-          placeholder="플레이어 검색(닉네임#tag)"
-          class="flex-grow px-6 py-4 text-lg focus:outline-none rounded-l-full"
+          placeholder="태그"
+          class="w-1/2 py-4 text-lg focus:outline-none"
         />
+
+        <!-- 검색 버튼 -->
         <button
           @click="handleSearch"
           class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-4 rounded-r-full flex items-center justify-center"
@@ -55,6 +69,30 @@
     </div>
   </div>
 </template>
+
+<!-- <script setup>
+import { ref } from 'vue'
+import { useRouter } from 'vue-router' 
+
+const searchText = ref('')
+const tagText = ref('')
+const router = useRouter() 
+
+const handleSearch = () => {
+  if (!searchText.value || !tagText.value) {
+    alert('플레이어와 태그를 모두 입력해주세요.')
+    return
+  }
+
+  router.push({
+    name: 'MatchDetail', 
+    params: {
+      gameName: tagText.value,
+      tagLine: searchText.value
+    }
+  })
+}
+</script> -->
 
 <script>
 
