@@ -12,6 +12,16 @@
       />
     </div>
 
+    <!-- 중앙 카테고리 -->
+    <nav class="flex-1 flex justify-center">
+      <button
+        @click="goToChampion"
+        class="text-gray-800 hover:text-blue-600 text-lg font-medium transition-colors duration-200"
+      >
+        챔피언 분석
+      </button>
+    </nav>
+
     <!-- 우측 로그인 버튼 -->
     <div>
       <button
@@ -36,8 +46,8 @@ const goToMain = () => {
 const goToLogin = () => {
   router.push('/login')
 }
-</script>
 
-<style scoped>
-/* 필요한 경우 여기에 스타일 추가 */
-</style>
+const goToChampion = () => {
+  router.push('/champions') // 챔피언 분석 페이지 경로에 맞게 수정
+}
+</script>
