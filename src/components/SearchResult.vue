@@ -38,6 +38,7 @@
             return {
                 profileIconId: null,
                 summonerLevel: null,
+                puuid: null,
                 gameName: "",
                 tagLine: ""
             };
@@ -79,12 +80,15 @@
                     this.summonerLevel = response.summonerLevel;
                     this.gameName = response.gameName;
                     this.tagLine = response.tagLine;
+                    this.puuid = response.puuid;
                 },
                 error: (error) => {
                     console.error("요청 실패:", error);
                     this.$router.push({ path: '/notfound' });
                 }
             });
+
+            
         }
     }
 
