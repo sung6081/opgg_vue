@@ -88,6 +88,7 @@
         const flexRankQue = ranks.value.find(r => r.queueType === 'RANKED_FLEX_SR');
 
         const tierMap = {
+            'IRON': 'Iron',
             BRONZE: 'Bronze',
             SILVER: 'Silver',
             GOLD: 'Gold',
