@@ -3,9 +3,10 @@ import LoginPage from '@/components/Login.vue'
 import MainPage from '@/components/MainPage.vue'
 import SignupPage from '@/components/SignupPage.vue'
 import GoogleRedirect from '@/components/GoogleLoginRedirect.vue'
+import MatchDetail from '@/components/MatchDetail.vue'
 import SearchResult from '@/components/SearchResult.vue'
 import NotFound from '@/components/NotFound.vue'
-import MatchDetail from '@/components/MatchDetail.vue'
+import Masteries from '@/components/Masteries.vue'
 
 const routes = [
   { path: '/', component: MainPage },
@@ -18,7 +19,8 @@ const routes = [
     path: '/matchdetail/:gameName/:tagLine',
     name: 'MatchDetail',
     component: MatchDetail
-  }
+  },
+  { path: '/mastry', component: Masteries }
 ]
 
 const router = createRouter({
