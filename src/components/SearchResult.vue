@@ -1,7 +1,8 @@
 <template>
   <div class="min-h-screen bg-gray-900 text-white px-6 py-8">
-    <!-- 상단 유저 정보 -->
-    <div class="flex items-center space-x-6">
+    
+    <!-- 유저 기본 정보 (상단) -->
+    <div class="flex items-center justify-center space-x-6 mb-10">
       <!-- 프로필 아이콘 -->
       <div class="relative">
         <img
@@ -25,24 +26,34 @@
           KR
         </div>
       </div>
-  </div>
+    </div>
 
-    <!-- 전적 정보 -->
-    <div>
+    <!-- 하단: 랭크 정보 + 전적 정보 -->
+    <div class="flex gap-8">
+      <!-- 좌측: RankInfo -->
+      <div class="w-1/4">
+        <RankInfo />
+      </div>
+
+      <!-- 우측: MatchDetail -->
+      <div class="w-3/4">
         <MatchDetail />
+      </div>
     </div>
-    </div>
+  </div>
 </template>
 
 <script>
 
     import $ from "jquery";
     import MatchDetail from "./MatchDetail.vue";
+    import RankInfo from "./RankInfo.vue";
 
     export default {
 
         components: {
-            MatchDetail
+            MatchDetail,
+            RankInfo
         },
 
         data() {
