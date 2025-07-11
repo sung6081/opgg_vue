@@ -12,7 +12,6 @@
         <table class="w-full text-sm text-left">
           <thead class="bg-gray-100 text-gray-700">
             <tr>
-              <th class="px-4 py-3">#{{ index + 1 }}</th>
               <th class="px-4 py-3">챔피언</th>
               <th class="px-4 py-3">K/D/A</th>
               <th class="px-4 py-3">게임모드</th>
@@ -21,9 +20,15 @@
             </tr>
           </thead>
           <tbody>
-            <tr class="bg-white hover:bg-gray-50 transition-all">
-              <td class="px-4 py-2 font-semibold">Match {{ index + 1 }}</td>
-              <td class="px-4 py-2">{{ match.championName }}</td>
+            <tr class="bg-black hover:bg-gray-50 transition-all">
+              <td class="px-4 py-2 flex items-center space-x-2">
+                <img
+                  :src="getChampionImage(match.championName)"
+                  alt="champ"
+                  class="w-8 h-8 rounded-full object-cover"
+                />
+                <span>{{ match.championName }}</span>
+              </td>
               <td class="px-4 py-2">{{ match.kills }}/{{ match.deaths }}/{{ match.assists }}</td>
               <td class="px-4 py-2">{{ match.gameMode }}</td>
               <td class="px-4 py-2 font-bold" :class="match.win ? 'text-blue-600' : 'text-red-600'">
@@ -45,15 +50,22 @@ import { onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import axios from 'axios'
 
+// 라우트로부터 게임명/태그 가져오기
 const route = useRoute()
 const matches = ref([])
 
+// 이미지 경로 매핑 함수 (Webpack 전용 방식)
+function getChampionImage(name) {
+  return require(`@/assets/img/champion/${name}.png`)
+}
+
+// 마운트 시 API 호출
 onMounted(async () => {
-  const { gameName, tagLine } = route.query;
-  console.log("전적 검색 : "+gameName+"#"+tagLine);
+  const { gameName, tagLine } = route.query
+  console.log("전적 검색 : " + gameName + "#" + tagLine)
+
   try {
     const res = await axios.get(`http://localhost:8080/opgg/riotapi/getRecentMatches/${gameName}/${tagLine}`)
-    console.log(res);
     matches.value = res.data
   } catch (e) {
     console.error('전적 조회 실패:', e)
