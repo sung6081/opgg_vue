@@ -6,7 +6,7 @@ import GoogleRedirect from '@/components/GoogleLoginRedirect.vue'
 import MatchDetail from '@/components/MatchDetail.vue'
 import SearchResult from '@/components/SearchResult.vue'
 import NotFound from '@/components/NotFound.vue'
-import Masteries from '@/components/Masteries.vue'
+import MasteryList from '@/components/MasteryList.vue'
 
 const routes = [
   { path: '/', component: MainPage },
@@ -20,7 +20,7 @@ const routes = [
     name: 'MatchDetail',
     component: MatchDetail
   },
-  { path: '/mastry', component: Masteries }
+  { path: '/mastry', component: MasteryList }
 ]
 
 const router = createRouter({

@@ -37,7 +37,7 @@
 
       <!-- 우측: MatchDetail -->
       <div class="w-3/4">
-        <Masteries />
+        <MasteryList />
         <MatchDetail />
       </div>
 
@@ -50,14 +50,14 @@
     import $ from "jquery";
     import MatchDetail from "./MatchDetail.vue";
     import RankInfo from "./RankInfo.vue";
-    import Masteries from "./Masteries.vue"
+    import MasteryList from "./MasteryList.vue"
 
     export default {
 
         components: {
             MatchDetail,
             RankInfo,
-            Masteries
+            MasteryList
         },
 
         data() {
