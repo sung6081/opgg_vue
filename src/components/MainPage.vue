@@ -1,32 +1,20 @@
 <template>
-  <div class="min-h-screen flex flex-col items-center justify-center bg-gray-100" style="background-color: rgb(31 41 55 / var(--tw-bg-opacity, 1));">
+  <div class="min-h-screen flex flex-col items-center justify-center bg-gray-900">
     <!-- 이미지 -->
-    <img src="@/assets/poro.png" alt="Poro" class="mb-6 w-148 h-auto" />
+    <img src="@/assets/poro.png" alt="Poro" class="mb-10 w-148 h-auto" />
 
     <div class="w-full max-w-2xl px-4">
+      <!-- 검색 입력 필드 -->
       <div class="flex items-center bg-white border border-gray-300 rounded-full shadow-md overflow-hidden">
-        <!-- 태그 입력 영역 (왼쪽) -->
-        <div class="flex items-center w-1/2 border-r border-gray-300 px-4 py-4">
-          <input
-            v-model="searchText"
-            @input="handleInputChange"
-            @compositionend="handleInputChange"
-            type="text"
-            placeholder="플레이어"
-            class="w-full text-lg focus:outline-none"
-            id="player"
-          />
-        </div>
-
-        <!-- 플레이어 입력 영역 (오른쪽) -->
-        <span class="text-gray-500 mr-2">#</span>
         <input
-          v-model="tagText"
+          v-model="fullSearchText"
+          @input="handleInputChange"
+          @compositionend="handleInputChange"
+          @keyup.enter="handleSearch"
           type="text"
-          placeholder="태그"
-          class="w-1/2 py-4 text-lg focus:outline-none"
-          id="tag"
->>>>>>>>> Temporary merge branch 2
+          placeholder="플레이어명#태그"
+          class="w-full px-5 py-4 text-lg text-gray-900 focus:outline-none focus:ring focus:ring-blue-250 rounded-full"
+          id="full-search"
         />
 
         <!-- 검색 버튼 -->
@@ -51,147 +39,116 @@
         </button>
       </div>
 
+      <!-- 자동완성 리스트 -->
       <ul v-if="accounts.length" class="mt-6 space-y-4">
-      <li @click="autoSearchCliked(a.puuid, $event)" v-for="a in accounts" :key="a.puuid" class="flex items-center bg-white rounded-xl shadow-md p-4" style="margin-top: 1px;">
-        <!-- 이미지 -->
-        <img
-          :src="getProfileIconUrl(a.profileIconId)"
-          class="w-14 h-14 rounded-full border border-gray-300 mr-4"
-        />
-
-        <!-- 텍스트 정보 -->
-        <div>
-          <div class="text-lg font-bold text-black cursor-pointer">
-            {{ a.gameName }} <span class="font-normal text-gray-700">#{{ a.tagLine }}</span>
+        <li
+          @click="autoSearchCliked(a.puuid, $event)"
+          v-for="a in accounts"
+          :key="a.puuid"
+          class="flex items-center bg-white rounded-xl shadow-md p-4 cursor-pointer hover:bg-gray-100 transition"
+        >
+          <img
+            :src="getProfileIconUrl(a.profileIconId)"
+            class="w-14 h-14 rounded-full border border-gray-300 mr-4"
+          />
+          <div>
+            <div class="text-lg font-bold text-black">
+              {{ a.gameName }} <span class="font-normal text-gray-700">#{{ a.tagLine }}</span>
+            </div>
+            <div class="text-sm text-gray-500">Level {{ a.summonerLevel }}</div>
           </div>
-          <div class="text-sm text-gray-500">Level {{ a.summonerLevel }}</div>
-        </div>
-      </li>
-    </ul>
-
+        </li>
+      </ul>
     </div>
   </div>
 </template>
 
-<!-- <script setup>
-import { ref } from 'vue'
-import { useRouter } from 'vue-router' 
-
-const searchText = ref('')
-const tagText = ref('')
-const router = useRouter() 
-
-const handleSearch = () => {
-  if (!searchText.value || !tagText.value) {
-    alert('플레이어와 태그를 모두 입력해주세요.')
-    return
-  }
-
-  router.push({
-    name: 'MatchDetail', 
-    params: {
-      gameName: tagText.value,
-      tagLine: searchText.value
-    }
-  })
-}
-</script> -->
-
 <script>
+import $ from "jquery";
 
-  import $ from "jquery";
+export default {
+  data() {
+    return {
+      fullSearchText: "",
+      accounts: []
+    };
+  },
+  methods: {
+    handleInputChange(e) {
+      const value = e.target.value;
+      this.fullSearchText = value;
 
-  export default {
-    data() {
-      return {
-        searchText: "",
-        tagText: "",
-        accounts: []
-      };
-    },
-    methods: {
-      handleInputChange(e) {
-        console.log("Changed:", this.searchText);
-        if(this.searchText == "") {
-          this.accounts = [];
-        }
-
-        const value = e.target.value;
-        this.searchText = value;
-
-        // Ajax 통신 (GET 방식 예시)
-        $.ajax({
-          url: `http://localhost:8080/opgg/riotapi/getRiotAccountsWithGameNameLike/` + this.searchText,
-          method: "GET",
-          success: (response) => {
-            console.log("백엔드 응답:", response);
-            // response 처리 (예: 결과 저장 또는 화면 반영)
-            if (Array.isArray(response) && response.length > 0) {
-              this.accounts = response;
-            } else {
-              this.accounts = [];
-            }
-          },
-          error: (error) => {
-            console.error("요청 실패:", error);
-          }
-        });
-      },
-      handleSearch() {
-        // 검색 버튼 눌렀을 때 처리 (필요 시 handleInputChange 재호출 가능)
-
-        const searchText = document.getElementById("player").value;
-        const tagText = document.getElementById("tag").value;
-
-        if (!searchText || !tagText) {
-          alert('플레이어와 태그를 모두 입력해주세요.')
-          return
-        }
-
-        this.searchText = searchText;
-        this.tagText = tagText;
-
-        //로직 실행
-        const gameName = searchText;
-        const tagLine = tagText;
-        console.log("gameName : "+gameName);
-        console.log("tag : "+ tagLine);
-        this.$router.push({
-          path: "/search",
-          query: {
-            gameName: gameName,
-            tagLine: tagLine
-          }
-        });
-      },
-      getProfileIconUrl(iconId) {
-        if(iconId < 0) {
-          return 'https://cdn.dak.gg/lol/images/summoner/profile_icon_null.jpg';
-        }
-        return `https://ddragon.leagueoflegends.com/cdn/15.13.1/img/profileicon/${iconId}.png`;
-      },
-      autoSearchCliked(puuid, e) {
-        const clickedText = $(e.target).text(); // e.g. "Hide on bush #KR1"
-        // $('input').val(clickedText); // input DOM에 값만 넣음
-        // this.searchText = clickedText; // Vue data도 동기화
-        // $('button').click();
-        //로직 실행
-          const parts = clickedText.split("#");
-          const gameName = parts[0];
-          const tagLine = parts[1];
-          console.log("gameName : "+gameName);
-          console.log("tag : "+ tagLine);
-          console.log("puuid : " + puuid);
-        this.$router.push({
-            path: "/search",
-            query: {
-              gameName,
-              tagLine,
-              puuid
-            }
-          });
+      const [gameName] = value.split("#");
+      if (!gameName || gameName.trim() === "") {
+        this.accounts = [];
+        return;
       }
-    }
-  };
 
+      // Ajax 요청
+      $.ajax({
+        url: `http://localhost:8080/opgg/riotapi/getRiotAccountsWithGameNameLike/${gameName}`,
+        method: "GET",
+        success: (response) => {
+          if (Array.isArray(response)) {
+            this.accounts = response;
+          } else {
+            this.accounts = [];
+          }
+        },
+        error: (error) => {
+          console.error("요청 실패:", error);
+        }
+      });
+    },
+    handleSearch() {
+      if (!this.fullSearchText.includes("#")) {
+        alert("플레이어명과 태그를 '#'로 구분해서 입력해주세요.");
+        return;
+      }
+
+      const [gameNameRaw, tagLineRaw] = this.fullSearchText.split("#");
+      const gameName = gameNameRaw?.trim();
+      const tagLine = tagLineRaw?.trim();
+
+      if (!gameName || !tagLine) {
+        alert("플레이어명과 태그를 모두 입력해주세요.");
+        return;
+      }
+
+      console.log("gameName:", gameName);
+      console.log("tagLine:", tagLine);
+
+      this.$router.push({
+        path: "/search",
+        query: { gameName, tagLine }
+      });
+    },
+    autoSearchCliked(puuid, e) {
+      const clickedText = $(e.target).text(); // e.g. "Hide on bush #KR1"
+      const [gameNameRaw, tagLineRaw] = clickedText.split("#");
+      const gameName = gameNameRaw?.trim();
+      const tagLine = tagLineRaw?.trim();
+
+      if (!gameName || !tagLine) return;
+
+      this.$router.push({
+        path: "/search",
+        query: {
+          gameName,
+          tagLine,
+          puuid
+        }
+      });
+    },
+    getProfileIconUrl(iconId) {
+      return iconId < 0
+        ? 'https://cdn.dak.gg/lol/images/summoner/profile_icon_null.jpg'
+        : `https://ddragon.leagueoflegends.com/cdn/15.13.1/img/profileicon/${iconId}.png`;
+    }
+  }
+};
 </script>
+
+<style scoped>
+/* 필요 시 추가 커스터마이징 가능 */
+</style>
