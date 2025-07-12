@@ -31,12 +31,12 @@
     <!-- 하단: 랭크 정보 + 전적 정보 -->
     <div class="flex gap-8">
       <!-- 좌측: RankInfo -->
-      <div class="w-1/4">
+      <div class="w-1/6" style="margin-left: 10px;">
         <RankInfo />
       </div>
 
       <!-- 우측: MatchDetail -->
-      <div class="w-3/4">
+      <div class="w-5/6">
         <MasteryList />
         <MatchDetail />
       </div>
