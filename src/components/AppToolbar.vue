@@ -18,7 +18,7 @@
         @click="goToChampion"
         class="text-gray-800 hover:text-blue-600 text-lg font-medium transition-colors duration-200"
       >
-        챔피언 분석
+        챔피언 정보
       </button>
     </nav>
 

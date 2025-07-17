@@ -1,0 +1,175 @@
+<template>
+
+    <div class="min-h-screen bg-gray-900 text-white px-6 py-8">
+        <!-- 페이지 이름 (상단) -->
+        <!-- <div class="flex items-center justify-center space-x-6 mb-10">
+            <h2 class="text-2xl font-bold mb-6 text-center">챔피언 정보</h2>
+        </div> -->
+
+        <!-- 하단: 챔피언 리스트 + 챔피언 자세히 -->
+        <div class="flex gap-8">
+        <!-- 좌측: 챔피언 리스트 -->
+        <div class="w-1/3 ml-[10px]">
+            <h3 class="text-sm font-semibold text-gray-300 mb-2">챔피언 리스트</h3>
+            
+            <!-- 챔피언 리스트 이미지 영역 -->
+            <!-- 스크롤 가능한 영역 -->
+            <div
+                class="flex flex-wrap gap-2 overflow-y-auto h-[600px] pr-2 scrollbar-left"
+            >
+                <div
+                    v-for="(champ, index) in champions"
+                    @click="changeChampInfo(champ)"
+                    :key="index"
+                    class="w-24 text-center relative"
+                    style="cursor: pointer;"
+                >
+                    <img
+                        :src="getChampionImage(champ.image)"
+                        alt="champ"
+                        class="w-auto h-auto rounded-md mx-auto"
+                    />
+                    <svg
+                        v-if="champ.rotation"
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="24"
+                        height="24"
+                        viewBox="0 0 24 24"
+                        class="absolute top-0 right-0 text-white z-10 bg-black rounded-full p-0.5"
+                    >
+                        <path
+                            fill="currentColor"
+                            fill-rule="nonzero"
+                            d="M14 2c2.21 0 4 1.79 4 4h-2a2 2 0 0 0-2-2h-4a2 2 0 0 0-1.995 1.85L8 6v2h10a2 2 0 0 1 2 2v7.641a2 2 0 0 1-1.268 1.862l-6 2.358a2 2 0 0 1-1.464 0l-6-2.358A2 2 0 0 1 4 17.64V10a2 2 0 0 1 2-2V6c0-2.21 1.79-4 4-4zm-2 10a2 2 0 1 0-.001 3.999A2 2 0 0 0 12 12"
+                        />
+                    </svg>
+                    <div class="mt-1 text-sm font-semibold">
+                        {{ champ.name }}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 우측: 챔피언 자세히 -->
+        <div
+            v-if="champInfo != null && champInfo != undefined" 
+            class="w-2/3">
+            <h3 class="text-sm font-semibold text-gray-300 mb-2 text-center"><span style="color: khaki;">{{ champInfo.title }}</span></h3>
+
+            <div>
+                <img
+                    :src="getChampionImage(champInfo.image)"
+                    alt="선택된 챔피언"
+                    class="w-96 h-auto rounded-lg shadow-lg mb-4 mx-auto"
+                />
+                <div class="text-lg font-bold text-white text-center" style="margin-bottom: 10px;">
+                    {{ champInfo.name }}
+                </div>
+
+                <!-- 스킬 이미지 목록 -->
+                <div class="flex gap-2 items-center justify-center flex-wrap">
+                    <!-- 패시브 스킬 -->
+                    <div class="flex flex-col items-center">
+                        <img
+                            :src="getPassiveImage(champInfo.passiveImage)"
+                            alt="패시브"
+                            class="w-24 h-24 rounded-md border border-yellow-400"
+                            :title="`${champInfo.passive}`"
+                        />
+                        <span class="text-xl text-gray-400 mt-1" style="color: khaki;">P</span>
+                    </div>
+
+                    <!-- 일반 스킬들 -->
+                    <div
+                        v-for="(skill, i) in champInfo.skills"
+                        :key="i"
+                        class="flex flex-col items-center"
+                    >
+                        <img
+                            :src="getSkillImage(skill.image)"
+                            :alt="skill.name"
+                            class="w-24 h-24 rounded-md border border-blue-400"
+                            :title="skill.name"
+                        />
+                        <span class="text-xl text-gray-400 mt-1">
+                            {{ ['Q', 'W', 'E', 'R'][i] }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    </div>
+
+</template>
+
+<script>
+
+    //import $ from "jquery";
+    //import { ref } from 'vue';
+    import axios from 'axios';
+
+    console.log('champion list');
+
+    export default{
+
+        data() {
+            return {
+                rotations: null,
+                champions: null,
+                original: null,
+                champInfo: null
+            };
+        },
+
+        methods: {
+
+            getChampionImage(championImage) {
+                return require('@/assets/img/champion/'+championImage);
+            },
+            changeChampInfo(champ) {
+                this.champInfo = champ;
+                console.log("changed info : ");
+                console.log(this.champInfo);
+            },
+            getPassiveImage(passiveImage) {
+                return require('@/assets/img/passive/'+passiveImage);
+            },
+            getSkillImage(skillImage) {
+                return require('@/assets/img/spell/'+skillImage);
+            }
+
+        },
+
+        async mounted() {
+
+            //로테이션 챔프들 가져오기
+            // try {
+            //     const res = await axios.get(`http://localhost:8080/opgg/riotapi/getRotationChamps`);
+            //     //console.log(res);
+            //     this.rotations = res.data;
+            //     console.log(this.rotations);
+            // } catch (e) {
+            //     console.error('로테이션 조회 실패:', e)
+            // }
+
+            //다 가져오기
+            try{
+                const res = await axios.get('http://localhost:8080/opgg/riotapi/getAllChamps');
+                this.champions = res.data;
+                this.champions.sort((a, b) => a.name.localeCompare(b.name));
+                this.original = this.champions;
+                this.champInfo = this.champions[0];
+                console.log(this.champions);
+                console.log(this.champInfo);
+            } catch (e) {
+                console.error('전체 챔피언 조회 실패:', e)
+            }
+
+        }
+
+    }
+
+</script>

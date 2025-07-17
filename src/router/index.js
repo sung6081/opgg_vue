@@ -7,6 +7,8 @@ import MatchDetail from '@/components/MatchDetail.vue'
 import SearchResult from '@/components/SearchResult.vue'
 import NotFound from '@/components/NotFound.vue'
 import MasteryList from '@/components/MasteryList.vue'
+import RotationChamps from '@/components/RotationChamps.vue'
+import ChampionsList from '@/components/ChampionsList.vue' 
 
 const routes = [
   { path: '/', component: MainPage },
@@ -20,7 +22,9 @@ const routes = [
     name: 'MatchDetail',
     component: MatchDetail
   },
-  { path: '/mastry', component: MasteryList }
+  { path: '/mastry', component: MasteryList },
+  { path: '/rotation', component: RotationChamps },
+  { path: '/champions', component: ChampionsList }
 ]
 
 const router = createRouter({
