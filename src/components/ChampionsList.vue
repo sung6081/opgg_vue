@@ -23,6 +23,7 @@
                     :key="index"
                     class="w-24 text-center relative"
                     style="cursor: pointer;"
+                    :title="`${champ.name}`"
                 >
                     <img
                         :src="getChampionImage(champ.image)"
@@ -43,7 +44,7 @@
                             d="M14 2c2.21 0 4 1.79 4 4h-2a2 2 0 0 0-2-2h-4a2 2 0 0 0-1.995 1.85L8 6v2h10a2 2 0 0 1 2 2v7.641a2 2 0 0 1-1.268 1.862l-6 2.358a2 2 0 0 1-1.464 0l-6-2.358A2 2 0 0 1 4 17.64V10a2 2 0 0 1 2-2V6c0-2.21 1.79-4 4-4zm-2 10a2 2 0 1 0-.001 3.999A2 2 0 0 0 12 12"
                         />
                     </svg>
-                    <div class="mt-1 text-sm font-semibold">
+                    <div class="mt-1 text-sm font-semibold truncate w-24">
                         {{ champ.name }}
                     </div>
                 </div>
@@ -58,9 +59,9 @@
 
             <div>
                 <img
-                    :src="getChampionImage(champInfo.image)"
+                    :src="getChampionImageSprite(champInfo.sprite)"
                     alt="선택된 챔피언"
-                    class="w-96 h-auto rounded-lg shadow-lg mb-4 mx-auto"
+                    class="w-auto h-[350px] rounded-lg shadow-lg mb-4 mx-auto"
                 />
                 <div class="text-lg font-bold text-white text-center" style="margin-bottom: 10px;">
                     {{ champInfo.name }}
@@ -69,21 +70,29 @@
                 <!-- 스킬 이미지 목록 -->
                 <div class="flex gap-2 items-center justify-center flex-wrap">
                     <!-- 패시브 스킬 -->
-                    <div class="flex flex-col items-center">
+                    <div class="relative group flex flex-col items-center">
                         <img
                             :src="getPassiveImage(champInfo.passiveImage)"
                             alt="패시브"
                             class="w-24 h-24 rounded-md border border-yellow-400"
-                            :title="`${champInfo.passive}`"
                         />
                         <span class="text-xl text-gray-400 mt-1" style="color: khaki;">P</span>
+                        <!-- 툴팁 -->
+                        <div
+                            class="absolute bottom-full mb-2 px-2 py-1 w-56 rounded bg-black text-white text-sm text-center
+                                opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10"
+                        >
+                            <span class="text-xs text-gray-400 mt-1" style="color: khaki;">{{ champInfo.passive }}</span>
+                            <br/>
+                            <span class="text-xs text-gray-400 mt-1" style="color: aliceblue;">{{ champInfo.passiveDescription }}</span>
+                        </div>
                     </div>
 
                     <!-- 일반 스킬들 -->
                     <div
                         v-for="(skill, i) in champInfo.skills"
                         :key="i"
-                        class="flex flex-col items-center"
+                        class="relative group flex flex-col items-center"
                     >
                         <img
                             :src="getSkillImage(skill.image)"
@@ -94,6 +103,29 @@
                         <span class="text-xl text-gray-400 mt-1">
                             {{ ['Q', 'W', 'E', 'R'][i] }}
                         </span>
+                        <!-- 툴팁 -->
+                        <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 -mb-2 z-50
+                            bg-gray-900 text-white p-4 rounded-lg w-[400px] shadow-lg space-y-3
+                        hidden group-hover:block">
+                            <!-- 스킬명 -->
+                            <div class="text-yellow-400 text-xl font-bold">{{ skill.name }}</div>
+
+                            <!-- 기본 정보 -->
+                            <div class="text-sm space-y-0.5 text-gray-300">
+                                <div><strong>범위:</strong> {{ skill.rangeBurn }}</div>
+                                <div><strong>소모값:</strong> {{ skill.costBurn || '소모값 없음' }}</div>
+                                <div><strong>쿨타임:</strong> {{ skill.cooldownBurn }}</div>
+                            </div>
+
+                            <!-- 설명 -->
+                            <div class="text-sm text-gray-100 whitespace-pre-wrap leading-relaxed">
+                                {{ skill.description }}
+                            </div>
+
+                            <!-- 주의사항 -->
+                            <div v-if="skill.tooltip" v-html="skill.tooltip" class="text-xs text-yellow-400 border-t border-gray-600 pt-2">
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -120,7 +152,8 @@
                 rotations: null,
                 champions: null,
                 original: null,
-                champInfo: null
+                champInfo: null,
+                defaultName: null
             };
         },
 
@@ -129,8 +162,15 @@
             getChampionImage(championImage) {
                 return require('@/assets/img/champion/'+championImage);
             },
+            getChampionImageSprite(championSpriteImage) {
+                if(championSpriteImage.split("_")[0] == 'Fiddlesticks') {
+                    championSpriteImage = 'FiddleSticks' + "_" + championSpriteImage.split("_")[1];
+                }
+                return require('@/assets/img/champion/splash/'+championSpriteImage);
+            },
             changeChampInfo(champ) {
                 this.champInfo = champ;
+                this.defaultName = this.champInfo.name;
                 console.log("changed info : ");
                 console.log(this.champInfo);
             },
@@ -162,6 +202,7 @@
                 this.champions.sort((a, b) => a.name.localeCompare(b.name));
                 this.original = this.champions;
                 this.champInfo = this.champions[0];
+                this.defaultName = this.champInfo.name;
                 console.log(this.champions);
                 console.log(this.champInfo);
             } catch (e) {
