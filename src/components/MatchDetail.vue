@@ -1,114 +1,170 @@
 <template>
-  <div class="p-6 max-w-6xl mx-auto">
+  <div class="p-6 max-w-4xl mx-auto text-white">
     <h2 class="text-2xl font-bold mb-6 text-center">전적 정보</h2>
 
-    <!-- 카테고리 필터 버튼 -->
-    <div class="flex justify-center gap-4 mb-6 flex-wrap">
-      <button
-        v-for="category in ['전체', ...categories]"
-        :key="category"
-        @click="setFilter(category)"
-        class="px-4 py-2 rounded-full border"
-        :class="{
-          'bg-blue-500 text-white': currentFilter === category,
-          'bg-white text-gray-800 hover:bg-gray-100': currentFilter !== category
-        }"
-      >
-        {{ category }}
-      </button>
-    </div>
+    <div v-if="loading" class="text-center text-lg">불러오는 중...</div>
+    <div v-else-if="error" class="text-red-400 text-center">{{ error }}</div>
 
-    <!-- 필터링된 전적 리스트 -->
-    <div v-if="filteredMatches.length" class="space-y-6">
+    <div
+      v-else
+      v-for="(match, index) in matches"
+      :key="match.matchId"
+      class="mb-6 bg-gray-800 rounded-xl p-4 shadow"
+    >
       <div
-        v-for="(match, index) in filteredMatches"
-        :key="index"
-        class="overflow-x-auto border rounded-lg shadow-sm"
-        :class="match.win ? 'bg-blue-50' : 'bg-red-50'"
+        class="flex justify-between items-center cursor-pointer"
+        @click="toggleMatch(index)"
       >
-        <table class="w-full text-sm text-left">
-          <thead class="bg-gray-100 text-gray-700">
+        <div>
+          <p class="text-xl font-semibold">
+            {{ getMyChampion(match) }} - {{ getMyResult(match) }}
+          </p>
+          <p>KDA: {{ getMyKDA(match) }}</p>
+          <p>
+            게임 모드: {{ match.gameMode }} |
+            시간: {{ formatDuration(match.gameDuration) }} |
+            시작: {{ formatDate(match.gameCreation) }}
+          </p>
+        </div>
+        <svg
+          :class="{ 'rotate-180': expandedIndex === index }"
+          class="w-6 h-6 transition-transform"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M19 9l-7 7-7-7"
+          />
+        </svg>
+      </div>
+
+      <div v-if="expandedIndex === index" class="mt-4">
+        <table class="w-full table-auto text-sm text-center bg-gray-700 rounded-lg overflow-hidden">
+          <thead class="bg-gray-600 text-white">
             <tr>
-              <th class="px-4 py-3">챔피언</th>
-              <th class="px-4 py-3">K/D/A</th>
-              <th class="px-4 py-3">게임모드</th>
-              <th class="px-4 py-3">결과</th>
-              <th class="px-4 py-3">게임 시간</th>
+              <th>소환사</th>
+              <th>챔피언</th>
+              <th>K / D / A</th>
+              <th>레벨</th>
+              <th>승리</th>
+              <th>팀</th>
             </tr>
           </thead>
           <tbody>
-            <tr class="bg-black hover:bg-gray-50 transition-all">
-              <td class="px-4 py-2 flex items-center space-x-2">
-                <img
-                  :src="getChampionImage(match.championName)"
-                  alt="champ"
-                  class="w-8 h-8 rounded-full object-cover"
-                />
-                <span>{{ match.championName }}</span>
+            <tr
+              v-for="p in match.participants"
+              :key="p.riotGameName + p.championName"
+              :class="{
+                'bg-gray-500 font-bold': isMe(p),
+                'hover:bg-gray-600': true
+              }"
+            >
+              <td>{{ p.riotGameName }}#{{ p.riotTagLine }}</td>
+              <td>{{ p.championName }}</td>
+              <td>{{ p.kills }} / {{ p.deaths }} / {{ p.assists }}</td>
+              <td>{{ p.champLevel }}</td>
+              <td :class="{ 'text-green-400': p.win, 'text-red-400': !p.win }">
+                {{ p.win ? "승리" : "패배" }}
               </td>
-              <td class="px-4 py-2">{{ match.kills }}/{{ match.deaths }}/{{ match.assists }}</td>
-              <td class="px-4 py-2">{{ match.gameMode }}</td>
-              <td class="px-4 py-2 font-bold" :class="match.win ? 'text-blue-600' : 'text-red-600'">
-                {{ match.win ? '승리' : '패배' }}
-              </td>
-              <td class="px-4 py-2">{{ (match.gameDuration / 60).toFixed(1) }}분</td>
+              <td>{{ p.teamId }}</td>
             </tr>
           </tbody>
         </table>
       </div>
     </div>
-
-    <p v-else class="text-center text-gray-500 mt-10">전적 정보를 불러오는 중이거나 없습니다.</p>
   </div>
 </template>
 
-<script setup>
-import { ref, onMounted } from 'vue'
-import { useRoute } from 'vue-router'
-import axios from 'axios'
+<script>
+export default {
+  data() {
+    return {
+      matches: [],
+      myGameName: '',
+      myTagLine: '',
+      expandedIndex: null,
+      loading: true,
+      error: null
+    };
+  },
+  mounted() {
+    const gameName = this.$route.query.gameName;
+    const tagLine = this.$route.query.tagLine;
 
-const route = useRoute()
+    if (!gameName || !tagLine) {
+      this.error = "잘못된 접근입니다.";
+      this.loading = false;
+      return;
+    }
 
-const categorizedMatches = ref({})
-const filteredMatches = ref([])
-const categories = ref([])
-const currentFilter = ref('전체')
+    this.myGameName = gameName;
+    this.myTagLine = tagLine;
 
-function getChampionImage(name) {
-  return require(`@/assets/img/champion/${name}.png`)
-}
-
-function setFilter(category) {
-  currentFilter.value = category
-
-  if (category === '전체') {
-    // 모든 전적을 flat하게 펼쳐서 보여주기
-    filteredMatches.value = Object.values(categorizedMatches.value)
-      .flatMap(mode => [...(mode.win || []), ...(mode.lose || [])])
-  } else {
-    const resultMap = categorizedMatches.value[category]
-    if (resultMap) {
-      filteredMatches.value = [...(resultMap.win || []), ...(resultMap.lose || [])]
-    } else {
-      filteredMatches.value = []
+    fetch(`http://localhost:8080/opgg/riotapi/getRecentMatches/${gameName}/${tagLine}`)
+      .then(res => {
+        if (!res.ok) throw new Error("서버 응답 실패");
+        return res.json();
+      })
+      .then(data => {
+        this.matches = data;
+      })
+      .catch(err => {
+        console.error(err);
+        this.error = "전적을 불러오지 못했습니다. 소환사명이 올바른지 확인해주세요.";
+      })
+      .finally(() => {
+        this.loading = false;
+      });
+  },
+  methods: {
+    toggleMatch(index) {
+      this.expandedIndex = this.expandedIndex === index ? null : index;
+    },
+    formatDuration(seconds) {
+      const min = Math.floor(seconds / 60);
+      const sec = seconds % 60;
+      return `${min}분 ${sec}초`;
+    },
+    formatDate(timestamp) {
+      const date = new Date(timestamp);
+      return date.toLocaleString(); // yyyy. mm. dd. hh:mm 형식
+    },
+    getMyChampion(match) {
+      const me = this.getMyParticipant(match);
+      return me ? me.championName : "알 수 없음";
+    },
+    getMyKDA(match) {
+      const me = this.getMyParticipant(match);
+      return me ? `${me.kills} / ${me.deaths} / ${me.assists}` : "-";
+    },
+    getMyResult(match) {
+      const me = this.getMyParticipant(match);
+      return me ? (me.win ? "승리" : "패배") : "결과 없음";
+    },
+    getMyParticipant(match) {
+      return match.participants.find(
+        p =>
+          p.riotGameName?.toLowerCase() === this.myGameName.toLowerCase() &&
+          p.riotTagLine?.toLowerCase() === this.myTagLine.toLowerCase()
+      );
+    },
+    isMe(p) {
+      return (
+        p.riotGameName?.toLowerCase() === this.myGameName.toLowerCase() &&
+        p.riotTagLine?.toLowerCase() === this.myTagLine.toLowerCase()
+      );
     }
   }
-}
-
-onMounted(async () => {
-  const { gameName, tagLine } = route.query
-
-  try {
-    const res = await axios.get(`http://localhost:8080/opgg/riotapi/getRecentMatchesCategorized/${gameName}/${tagLine}`)
-    categorizedMatches.value = res.data
-
-    // 카테고리 목록 생성
-    categories.value = Object.keys(res.data)
-
-    // 처음에는 전체 전적 보여주기
-    setFilter('전체')
-  } catch (e) {
-    console.error('전적 조회 실패:', e)
-  }
-})
+};
 </script>
+
+<style scoped>
+.rotate-180 {
+  transform: rotate(180deg);
+}
+</style>
