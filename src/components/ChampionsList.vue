@@ -78,6 +78,7 @@
                             :src="getCarouselImage(skin.num, champInfo.id)"
                             class="block w-full h-full object-cover rounded-xl transition-all"
                             alt="carousel"
+                            style="margin-bottom: 10px;"
                         />
                         <div class="text-lg font-bold text-white text-center" style="margin-bottom: 10px;">
                             {{ skin.name === 'default' ? champInfo.name : skin.name }}
