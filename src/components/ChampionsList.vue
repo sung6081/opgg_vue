@@ -58,13 +58,53 @@
             <h3 class="text-sm font-semibold text-gray-300 mb-2 text-center"><span style="color: khaki;">{{ champInfo.title }}</span></h3>
 
             <div>
-                <img
+                <!-- <img
                     :src="getChampionImageSprite(champInfo.sprite)"
                     alt="선택된 챔피언"
                     class="w-auto h-[350px] rounded-lg shadow-lg mb-4 mx-auto"
-                />
-                <div class="text-lg font-bold text-white text-center" style="margin-bottom: 10px;">
-                    {{ champInfo.name }}
+                /> -->
+
+                <!-- carousel -->
+                 <div class="relative w-[500px] h-auto overflow-visible mx-auto mt-4">
+                    <div id="default-carousel" class="relative" data-carousel="static">
+                    <!-- Carousel items -->
+                    <div class="relative w-[500px] h-auto overflow-hidden rounded-xl">
+                        <div
+                        :class="currentIndex === index ? 'block duration-700 ease-in-out' : 'hidden duration-700 ease-in-out'"
+                        v-for="(skin, index) in champInfo.skins"
+                        :key="index"
+                        >
+                        <img
+                            :src="getCarouselImage(skin.num, champInfo.id)"
+                            class="block w-full h-full object-cover rounded-xl transition-all"
+                            alt="carousel"
+                        />
+                        <div class="text-lg font-bold text-white text-center" style="margin-bottom: 10px;">
+                            {{ skin.name === 'default' ? champInfo.name : skin.name }}
+                        </div>
+                        </div>
+                    </div>
+
+                    <!-- Carousel controls -->
+                    <button
+                        @click="prev"
+                        type="button"
+                        class="absolute top-1/2 -left-16 transform -translate-y-1/2 z-20"
+                    >
+                        <span class="inline-flex items-center justify-center w-10 h-10 bg-white/30 group-hover:bg-white/50 rounded-full">
+                        ‹
+                        </span>
+                    </button>
+                    <button
+                        @click="next"
+                        type="button"
+                        class="absolute top-1/2 -right-16 transform -translate-y-1/2 z-20"
+                    >
+                        <span class="inline-flex items-center justify-center w-10 h-10 bg-white/30 group-hover:bg-white/50 rounded-full">
+                        ›
+                        </span>
+                    </button>
+                    </div>
                 </div>
 
                 <!-- 스킬 이미지 목록 -->
@@ -153,7 +193,8 @@
                 champions: null,
                 original: null,
                 champInfo: null,
-                defaultName: null
+                defaultName: null,
+                currentIndex: 0
             };
         },
 
@@ -162,15 +203,27 @@
             getChampionImage(championImage) {
                 return require('@/assets/img/champion/'+championImage);
             },
-            getChampionImageSprite(championSpriteImage) {
-                if(championSpriteImage.split("_")[0] == 'Fiddlesticks') {
-                    championSpriteImage = 'FiddleSticks' + "_" + championSpriteImage.split("_")[1];
+            // getChampionImageSprite(championSpriteImage) {
+            //     if(championSpriteImage.split("_")[0] == 'Fiddlesticks') {
+            //         championSpriteImage = 'FiddleSticks' + "_" + championSpriteImage.split("_")[1];
+            //     }
+            //     return require('@/assets/img/champion/splash/'+championSpriteImage);
+            // },
+            getCarouselImage(skinNum, championName) {
+                if(championName == 'Fiddlesticks') {
+                    championName = 'FiddleSticks';
                 }
-                return require('@/assets/img/champion/splash/'+championSpriteImage);
+
+                const img = championName + "_" + skinNum + '.jpg';
+
+                //console.log(img);
+
+                return require('@/assets/img/champion/splash/' + img);
             },
             changeChampInfo(champ) {
                 this.champInfo = champ;
                 this.defaultName = this.champInfo.name;
+                this.currentIndex = 0;
                 console.log("changed info : ");
                 console.log(this.champInfo);
             },
@@ -179,6 +232,16 @@
             },
             getSkillImage(skillImage) {
                 return require('@/assets/img/spell/'+skillImage);
+            },
+            next() {
+                if (!this.champInfo?.skins?.length) return;
+                this.currentIndex = (this.currentIndex + 1) % this.champInfo.skins.length;
+            },
+            prev() {
+                if (!this.champInfo?.skins?.length) return;
+                this.currentIndex =
+                (this.currentIndex - 1 + this.champInfo.skins.length) %
+                this.champInfo.skins.length;
             }
 
         },
