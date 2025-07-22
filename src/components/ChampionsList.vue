@@ -125,7 +125,8 @@
                         >
                             <span class="text-xs text-gray-400 mt-1" style="color: khaki;">{{ champInfo.passive }}</span>
                             <br/>
-                            <span class="text-xs text-gray-400 mt-1" style="color: aliceblue;">{{ champInfo.passiveDescription }}</span>
+                            <!-- <span class="text-xs text-gray-400 mt-1" style="color: aliceblue;">{{ champInfo.passiveDescription }}</span> -->
+                            <div v-html="champInfo.passiveDescription"></div>
                         </div>
                     </div>
 
@@ -164,7 +165,7 @@
                             </div>
 
                             <!-- 주의사항 -->
-                            <div v-if="skill.tooltip" v-html="skill.tooltip" class="text-xs text-yellow-400 border-t border-gray-600 pt-2">
+                            <div v-if="skill.tooltip" v-html="replaceVariablesWithQuestionMarks(skill.tooltip)" class="text-xs text-yellow-400 border-t border-gray-600 pt-2">
                             </div>
                         </div>
                     </div>
@@ -243,6 +244,10 @@
                 this.currentIndex =
                 (this.currentIndex - 1 + this.champInfo.skins.length) %
                 this.champInfo.skins.length;
+            },
+            replaceVariablesWithQuestionMarks(tooltip) {
+                //console.log('description : \n'+description.replace(/\{\{[^}]+\}\}/g, '?'));
+                return (tooltip || '').replace(/\{\{[^}]+\}\}/g, '?');
             }
 
         },
