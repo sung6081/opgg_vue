@@ -1,23 +1,44 @@
 <template>
   <div class="p-6 max-w-4xl mx-auto text-white">
-    <h2 class="text-2xl font-bold mb-6 text-center">전적 정보</h2>
+    <!-- 카테고리 필터 버튼 -->
+    <div class="flex gap-2 justify-center mb-4 flex-wrap">
+      <button
+        v-for="mode in gameModes"
+        :key="mode"
+        @click="selectedMode = mode"
+        :class="[
+          'px-3 py-1 rounded-lg border',
+          selectedMode === mode ? 'bg-blue-500 text-white' : 'bg-gray-700 text-white hover:bg-gray-600'
+        ]"
+      >
+        {{ mode }}
+      </button>
+    </div>
 
     <div v-if="loading" class="text-center text-lg">불러오는 중...</div>
     <div v-else-if="error" class="text-red-400 text-center">{{ error }}</div>
 
     <div
       v-else
-      v-for="(match, index) in matches"
+      v-for="(match, index) in filteredMatches"
       :key="match.matchId"
       class="mb-6 bg-gray-800 rounded-xl p-4 shadow"
     >
+      <!-- 매치 상단 정보 -->
       <div
         class="flex justify-between items-center cursor-pointer"
         @click="toggleMatch(index)"
       >
         <div>
-          <p class="text-xl font-semibold">
-            {{ getMyChampion(match) }} - {{ getMyResult(match) }}
+          <p class="text-xl font-semibold flex items-center gap-2">
+            <img
+              v-if="getImageExists(getMyChampion(match))"
+              :src="getChampionImage(getMyChampion(match))"
+              alt="champion"
+              class="w-8 h-8 rounded-full border border-white"
+              @error="onImgError"
+            />
+            {{ getMyResult(match) }}
           </p>
           <p>KDA: {{ getMyKDA(match) }}</p>
           <p>
@@ -43,35 +64,52 @@
         </svg>
       </div>
 
+      <!-- 상세 정보 영역 -->
       <div v-if="expandedIndex === index" class="mt-4">
-        <table class="w-full table-auto text-sm text-center bg-gray-700 rounded-lg overflow-hidden">
+        <!-- 블루팀 -->
+        <h3 class="text-lg font-bold text-blue-300">블루팀</h3>
+        <table class="w-full table-auto text-sm text-center rounded-lg overflow-hidden mb-4"
+          :class="getTeamWin(match, 100) ? 'bg-blue-200 text-black' : 'bg-red-200 text-black'">
           <thead class="bg-gray-600 text-white">
-            <tr>
-              <th>소환사</th>
-              <th>챔피언</th>
-              <th>K / D / A</th>
-              <th>레벨</th>
-              <th>승리</th>
-              <th>팀</th>
-            </tr>
+            <tr><th>챔피언</th><th>소환사</th><th>K / D / A</th><th>레벨</th><th>아이템</th></tr>
           </thead>
           <tbody>
             <tr
-              v-for="p in match.participants"
+              v-for="p in match.participants.filter(p => p.teamId === 100)"
               :key="p.riotGameName + p.championName"
-              :class="{
-                'bg-gray-500 font-bold': isMe(p),
-                'hover:bg-gray-600': true
-              }"
+              :class="{ 'bg-gray-500 font-bold': isMe(p), 'hover:bg-gray-600': true }"
             >
+              <td><img v-if="getImageExists(p.championName)" :src="getChampionImage(p.championName)" class="w-6 h-6 rounded-full" @error="onImgError" /></td>
               <td>{{ p.riotGameName }}#{{ p.riotTagLine }}</td>
-              <td>{{ p.championName }}</td>
               <td>{{ p.kills }} / {{ p.deaths }} / {{ p.assists }}</td>
               <td>{{ p.champLevel }}</td>
-              <td :class="{ 'text-green-400': p.win, 'text-red-400': !p.win }">
-                {{ p.win ? "승리" : "패배" }}
+              <td class="flex justify-center gap-1 flex-wrap">
+                <img v-for="(itemId, i) in getItems(p)" :key="i" :src="getItemImage(itemId)" class="w-5 h-5 rounded border" @error="onImgError" />
               </td>
-              <td>{{ p.teamId }}</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <!-- 레드팀 -->
+        <h3 class="text-lg font-bold text-red-300">레드팀</h3>
+        <table class="w-full table-auto text-sm text-center rounded-lg overflow-hidden"
+          :class="getTeamWin(match, 200) ? 'bg-blue-200 text-black' : 'bg-red-200 text-black'">
+          <thead class="bg-gray-600 text-white">
+            <tr><th>챔피언</th><th>소환사</th><th>K / D / A</th><th>레벨</th><th>아이템</th></tr>
+          </thead>
+          <tbody>
+            <tr
+              v-for="p in match.participants.filter(p => p.teamId === 200)"
+              :key="p.riotGameName + p.championName"
+              :class="{ 'bg-gray-500 font-bold': isMe(p), 'hover:bg-gray-600': true }"
+            >
+              <td><img v-if="getImageExists(p.championName)" :src="getChampionImage(p.championName)" class="w-6 h-6 rounded-full" @error="onImgError" /></td>
+              <td>{{ p.riotGameName }}#{{ p.riotTagLine }}</td>
+              <td>{{ p.kills }} / {{ p.deaths }} / {{ p.assists }}</td>
+              <td>{{ p.champLevel }}</td>
+              <td class="flex justify-center gap-1 flex-wrap">
+                <img v-for="(itemId, i) in getItems(p)" :key="i" :src="getItemImage(itemId)" class="w-5 h-5 rounded border" @error="onImgError" />
+              </td>
             </tr>
           </tbody>
         </table>
@@ -89,8 +127,17 @@ export default {
       myTagLine: '',
       expandedIndex: null,
       loading: true,
-      error: null
+      error: null,
+      imageCache: {},
+      selectedMode: '전체', // ✅ 선택된 모드
+      gameModes: ['전체', 'CLASSIC', 'ARAM', 'URF'], // ✅ 보여줄 모드들
     };
+  },
+  computed: {
+    filteredMatches() {
+      if (this.selectedMode === '전체') return this.matches;
+      return this.matches.filter(m => m.gameMode === this.selectedMode);
+    }
   },
   mounted() {
     const gameName = this.$route.query.gameName;
@@ -132,7 +179,7 @@ export default {
     },
     formatDate(timestamp) {
       const date = new Date(timestamp);
-      return date.toLocaleString(); // yyyy. mm. dd. hh:mm 형식
+      return date.toLocaleString();
     },
     getMyChampion(match) {
       const me = this.getMyParticipant(match);
@@ -158,6 +205,45 @@ export default {
         p.riotGameName?.toLowerCase() === this.myGameName.toLowerCase() &&
         p.riotTagLine?.toLowerCase() === this.myTagLine.toLowerCase()
       );
+    },
+    getChampionImage(championName) {
+      const cleanName = championName?.replace(/\s+/g, "").replace(/[^\w]/g, "");
+      return require(`@/assets/img/champion/${cleanName}.png`);
+    },
+    getItemImage(itemId) {
+      try {
+        return require(`@/assets/img/item/${itemId}.png`);
+      } catch (e) {
+        return '';
+      }
+    },
+    getImageExists(championName) {
+      const cleanName = championName?.replace(/\s+/g, "").replace(/[^\w]/g, "");
+
+      if (this.imageCache[cleanName] !== undefined) {
+        return this.imageCache[cleanName];
+      }
+
+      try {
+        require(`@/assets/img/champion/${cleanName}.png`);
+        this.imageCache[cleanName] = true;
+        return true;
+      } catch (e) {
+        this.imageCache[cleanName] = false;
+        return false;
+      }
+    },
+    onImgError(event) {
+      event.target.style.display = "none";
+    },
+    getTeamWin(match, teamId) {
+      const player = match.participants.find(p => p.teamId === teamId);
+      return player?.win === true;
+    },
+    getItems(p) {
+      return Array.from({ length: 7 })
+        .map((_, i) => p[`item${i}`])
+        .filter(id => id && id !== 0);
     }
   }
 };
