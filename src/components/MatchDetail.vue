@@ -79,8 +79,22 @@
               :key="p.riotGameName + p.championName"
               :class="{ 'bg-gray-500 font-bold': isMe(p), 'hover:bg-gray-600': true }"
             >
-              <td><img v-if="getImageExists(p.championName)" :src="getChampionImage(p.championName)" class="w-6 h-6 rounded-full" @error="onImgError" /></td>
-              <td>{{ p.riotGameName }}#{{ p.riotTagLine }}</td>
+              <td class="flex items-center gap-1 justify-center">
+                <!-- 챔피언 이미지 -->
+                <img v-if="getImageExists(p.championName)" :src="getChampionImage(p.championName)" class="w-6 h-6 rounded-full" @error="onImgError" />
+                <!-- 스펠 이미지 2개 -->
+                <img v-if="getSpellImage(p.spell1Id)" :src="getSpellImage(p.spell1Id)" class="w-5 h-5 rounded border" @error="onImgError" />
+                <img v-if="getSpellImage(p.spell2Id)" :src="getSpellImage(p.spell2Id)" class="w-5 h-5 rounded border" @error="onImgError" />
+              </td>
+              <!-- ✅ 소환사 이름 클릭 이벤트 추가 -->
+              <td>
+                <span
+                  class="text-blue-400 cursor-pointer hover:underline"
+                  @click="goToSummoner(p.riotGameName, p.riotTagLine)"
+                >
+                  {{ p.riotGameName }}#{{ p.riotTagLine }}
+                </span>
+              </td>
               <td>{{ p.kills }} / {{ p.deaths }} / {{ p.assists }}</td>
               <td>{{ p.champLevel }}</td>
               <td class="flex justify-center gap-1 flex-wrap">
@@ -103,8 +117,22 @@
               :key="p.riotGameName + p.championName"
               :class="{ 'bg-gray-500 font-bold': isMe(p), 'hover:bg-gray-600': true }"
             >
-              <td><img v-if="getImageExists(p.championName)" :src="getChampionImage(p.championName)" class="w-6 h-6 rounded-full" @error="onImgError" /></td>
-              <td>{{ p.riotGameName }}#{{ p.riotTagLine }}</td>
+              <td class="flex items-center gap-1 justify-center">
+                <!-- 챔피언 이미지 -->
+                <img v-if="getImageExists(p.championName)" :src="getChampionImage(p.championName)" class="w-6 h-6 rounded-full" @error="onImgError" />
+                <!-- 스펠 이미지 2개 -->
+                <img v-if="getSpellImage(p.spell1Id)" :src="getSpellImage(p.spell1Id)" class="w-5 h-5 rounded border" @error="onImgError" />
+                <img v-if="getSpellImage(p.spell2Id)" :src="getSpellImage(p.spell2Id)" class="w-5 h-5 rounded border" @error="onImgError" />
+              </td>
+              <!-- ✅ 소환사 이름 클릭 이벤트 추가 -->
+              <td>
+                <span
+                  class="text-blue-400 cursor-pointer hover:underline"
+                  @click="goToSummoner(p.riotGameName, p.riotTagLine)"
+                >
+                  {{ p.riotGameName }}#{{ p.riotTagLine }}
+                </span>
+              </td>
               <td>{{ p.kills }} / {{ p.deaths }} / {{ p.assists }}</td>
               <td>{{ p.champLevel }}</td>
               <td class="flex justify-center gap-1 flex-wrap">
@@ -129,8 +157,8 @@ export default {
       loading: true,
       error: null,
       imageCache: {},
-      selectedMode: '전체', // ✅ 선택된 모드
-      gameModes: ['전체', 'CLASSIC', 'ARAM', 'URF'], // ✅ 보여줄 모드들
+      selectedMode: '전체',
+      gameModes: ['전체', 'CLASSIC', 'ARAM', 'URF'],
     };
   },
   computed: {
@@ -217,13 +245,35 @@ export default {
         return '';
       }
     },
+    getSpellImage(spellId) {
+      const spellMap = {
+        1: "SummonerBoost.png",
+        3: "SummonerExhaust.png",
+        4: "SummonerFlash.png",
+        6: "SummonerHaste.png",
+        7: "SummonerHeal.png",
+        11: "SummonerSmite.png",
+        12: "SummonerTeleport.png",
+        13: "SummonerMana.png",
+        14: "SummonerDot.png",
+        21: "SummonerBarrier.png",
+        30: "SummonerPoroThrow.png",
+        31: "SummonerPoroRecall.png",
+        32: "SummonerSnowball.png",
+      };
+      const fileName = spellMap[spellId];
+      if (!fileName) return '';
+      try {
+        return require(`@/assets/img/spell/${fileName}`);
+      } catch (e) {
+        return '';
+      }
+    },
     getImageExists(championName) {
       const cleanName = championName?.replace(/\s+/g, "").replace(/[^\w]/g, "");
-
       if (this.imageCache[cleanName] !== undefined) {
         return this.imageCache[cleanName];
       }
-
       try {
         require(`@/assets/img/champion/${cleanName}.png`);
         this.imageCache[cleanName] = true;
@@ -244,7 +294,16 @@ export default {
       return Array.from({ length: 7 })
         .map((_, i) => p[`item${i}`])
         .filter(id => id && id !== 0);
-    }
+    },
+    //소환사 클릭 시 라우팅
+   goToSummoner(gameName, tagLine) {
+  const routeData = this.$router.resolve({
+    path: "/search",
+    query: { gameName, tagLine }
+  });
+  window.open(routeData.href, "_blank"); // 새 창으로 검색
+}
+
   }
 };
 </script>
