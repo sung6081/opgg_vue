@@ -1,7 +1,7 @@
 <template>
   <div class="p-6 max-w-6xl mx-auto text-white" style="padding-top: 0px;">
 
-    <h2 class="text-2xl font-bold mb-6 text-center">숙력도 정보</h2>
+    <h2 class="text-2xl font-bold mb-6 text-center">숙련도 정보</h2>
 
     <!-- 로딩창 -->
     <div id="areaLoading" role="status" class="flex items-center justify-center z-50" style="margin-bottom: 20px;">
@@ -12,7 +12,8 @@
       <span class="sr-only">Loading...</span>
     </div>
 
-    <div class="flex justify-between items-end flex-wrap gap-6">
+    <div class="grid grid-cols-10 gap-6 justify-items-center">
+
       <div
         v-for="(champ, index) in masteries.slice(0, length)"
         :key="index"
@@ -22,11 +23,11 @@
         <img
           :src="getChampionImage(champ.champion.image)"
           alt="champ"
-          class="w-20 h-20 rounded-md mx-auto"
+          class="w-11 h-11 rounded-md mx-auto"
         />
 
         <!-- 숙련도 레벨 뱃지 -->
-        <div class="relative w-12 h-12 mx-auto -mt-3">
+        <div class="relative w-10 h-10 mx-auto -mt-3">
           <img
             :src="getMasteryEmblem(champ.championLevel)"
             alt="mastery"
@@ -68,7 +69,7 @@
 
   const route = useRoute();
   const masteries = ref([]);
-  const length = ref(9);
+  const length = ref(10);
   const isExpanded = ref(false);
 
   const getChampionImage = (championImage) => {
@@ -111,7 +112,7 @@
       length.value = masteries.value.length;
       isExpanded.value = true;
     } else {
-      length.value = 9;
+      length.value = 10;
       isExpanded.value = false;
     }
   };
