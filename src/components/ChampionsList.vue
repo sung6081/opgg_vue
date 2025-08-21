@@ -123,10 +123,10 @@
                             class="absolute bottom-full mb-2 px-2 py-1 w-56 rounded bg-black text-white text-sm text-center
                                 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10"
                         >
-                            <span class="text-xs text-gray-400 mt-1" style="color: khaki;">{{ champInfo.passive }}</span>
+                            <span class="text-yellow-400 text-xl font-bold" style="color: khaki;">{{ champInfo.passive }}</span>
                             <br/>
                             <!-- <span class="text-xs text-gray-400 mt-1" style="color: aliceblue;">{{ champInfo.passiveDescription }}</span> -->
-                            <div v-html="champInfo.passiveDescription"></div>
+                            <div class="text-sm text-gray-100 whitespace-pre-wrap leading-relaxed" v-html="champInfo.passiveDescription"></div>
                         </div>
                     </div>
 
@@ -160,9 +160,7 @@
                             </div>
 
                             <!-- 설명 -->
-                            <div class="text-sm text-gray-100 whitespace-pre-wrap leading-relaxed">
-                                {{ skill.description }}
-                            </div>
+                            <div class="text-sm text-gray-100 whitespace-pre-wrap leading-relaxed" v-html="skill.description"></div>
 
                             <!-- 주의사항 -->
                             <div v-if="skill.tooltip" v-html="replaceVariablesWithQuestionMarks(skill.tooltip)" class="text-xs text-yellow-400 border-t border-gray-600 pt-2">
