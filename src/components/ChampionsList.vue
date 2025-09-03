@@ -11,11 +11,33 @@
         <!-- 좌측: 챔피언 리스트 -->
         <div class="w-1/3 ml-[10px]">
             <h3 class="text-sm font-semibold text-gray-300 mb-2">챔피언 리스트</h3>
+            <!-- 검색창 -->
+            <div class="relative mb-4">
+                <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+                    <!-- 돋보기 아이콘 -->
+                    <svg xmlns="http://www.w3.org/2000/svg" 
+                        class="h-5 w-5" fill="none" 
+                        viewBox="0 0 24 24" 
+                        stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" 
+                            stroke-linejoin="round" 
+                            d="M21 21l-4.35-4.35M11 19a8 8 0 1 1 0-16 8 8 0 0 1 0 16z" />
+                    </svg>
+                </span>
+                <input
+                    type="text"
+                    placeholder="챔피언 검색"
+                    class="w-full pl-10 pr-4 py-2 rounded-lg bg-gray-800 text-white 
+                        placeholder-gray-400 focus:outline-none focus:ring-2 
+                        focus:ring-blue-500"
+                    @input="searchChamps($event)"
+                />
+            </div>
             
             <!-- 챔피언 리스트 이미지 영역 -->
             <!-- 스크롤 가능한 영역 -->
             <div
-                class="flex flex-wrap gap-2 overflow-y-auto h-[600px] pr-2 scrollbar-left"
+                class="flex flex-wrap gap-2 overflow-y-auto pr-2 scrollbar-left"
             >
                 <div
                     v-for="(champ, index) in champions"
@@ -192,6 +214,7 @@
                 rotations: null,
                 champions: null,
                 original: null,
+                searchQuery : null,
                 champInfo: null,
                 defaultName: null,
                 currentIndex: 0
@@ -218,7 +241,7 @@
 
                 //console.log(img);
 
-                return require('@/assets/img/champion/splash/' + img);
+                return require('@/assets/img/splash/' + img);
             },
             changeChampInfo(champ) {
                 this.champInfo = champ;
@@ -246,6 +269,51 @@
             replaceVariablesWithQuestionMarks(tooltip) {
                 //console.log('description : \n'+description.replace(/\{\{[^}]+\}\}/g, '?'));
                 return (tooltip || '').replace(/\{\{[^}]+\}\}/g, '?');
+            },
+            getChosung(str) {
+                const CHO = [
+                    "ㄱ","ㄲ","ㄴ","ㄷ","ㄸ","ㄹ","ㅁ","ㅂ","ㅃ","ㅅ","ㅆ",
+                    "ㅇ","ㅈ","ㅉ","ㅊ","ㅋ","ㅌ","ㅍ","ㅎ"
+                ];
+                
+                return str.split('').map(ch => {
+                    const code = ch.charCodeAt(0) - 44032;
+                    if (code >= 0 && code <= 11171) {
+                    return CHO[Math.floor(code / 588)];
+                    }
+                    return ch; // 한글이 아닌 경우 그대로 반환
+                }).join('');
+            },
+            filteredChampions() {
+                if (!this.searchQuery) return this.original;
+
+                console.log(this.searchQuery);
+
+                const query = this.searchQuery.trim();
+
+                // ✅ 초성만으로 구성된 검색어인지 확인 (ㄱ~ㅎ 범위)
+                const isChosung = /^[ㄱ-ㅎ]+$/.test(query);
+
+                if (isChosung) {
+                    // 초성 검색
+                    return this.original.filter(champ =>
+                        this.getChosung(champ.name).includes(query)
+                    );
+                } else {
+                    // 일반 문자열 검색
+                    return this.original.filter(champ =>
+                        champ.name.toLowerCase().includes(query.toLowerCase())
+                    );
+                }
+            },
+            searchChamps(e) {
+
+                this.searchQuery = e.target.value;
+
+                console.log(this.searchQuery);
+
+                this.champions = this.filteredChampions();
+
             }
 
         },
